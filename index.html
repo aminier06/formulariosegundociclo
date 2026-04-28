@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistematización Evaluación de Seguimiento - Segundo Ciclo</title>
+  <style>
+    :root {
+      --azul: #123c69;
+      --azul2: #0b5d8b;
+      --gris: #f3f6f9;
+      --borde: #d9e2ec;
+      --texto: #1f2933;
+      --error: #b00020;
+      --ok: #0b6b3a;
+      --alerta: #fff4e5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef3f7;
+      color: var(--texto);
+      line-height: 1.45;
+    }
+    header {
+      background: linear-gradient(135deg, var(--azul), var(--azul2));
+      color: white;
+      padding: 28px 18px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+    }
+    header p {
+      max-width: 980px;
+      margin: 0 auto;
+      font-size: 0.98rem;
+      opacity: .95;
+    }
+    main {
+      max-width: 1120px;
+      margin: 22px auto 60px;
+      padding: 0 14px;
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 22px rgba(16, 42, 67, .07);
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.18rem;
+      color: var(--azul);
+    }
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 1rem;
+      color: #243b53;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .required::after {
+      content: " *";
+      color: var(--error);
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 11px;
+      border: 1px solid #bcccdc;
+      border-radius: 9px;
+      font-size: 0.95rem;
+      background: white;
+    }
+    input[type="number"] { text-align: right; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .field { margin-bottom: 12px; }
+    .help {
+      font-size: .86rem;
+      color: #52606d;
+      margin-top: 4px;
+    }
+    .section-description {
+      background: var(--gris);
+      border-left: 4px solid var(--azul2);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+    .indicator-group {
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 14px 0;
+      background: #fbfdff;
+    }
+    .indicator-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .sum-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: #eef8f1;
+      color: var(--ok);
+      font-weight: 700;
+      font-size: .92rem;
+    }
+    .sum-line.error {
+      background: #fdecea;
+      color: var(--error);
+    }
+    .sum-line.warning {
+      background: var(--alerta);
+      color: #7a4b00;
+    }
+    .centro-ok { color: var(--ok); font-weight: 700; }
+    .centro-error { color: var(--error); font-weight: 700; }
+    .error-msg {
+      color: var(--error);
+      font-weight: 700;
+      font-size: .88rem;
+      margin-top: 7px;
+      display: none;
+    }
+    .global-error {
+      display: none;
+      background: #fdecea;
+      color: var(--error);
+      border: 1px solid #f5b7b1;
+      padding: 13px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      position: sticky;
+      bottom: 0;
+      background: rgba(238, 243, 247, .94);
+      padding: 14px 0;
+      backdrop-filter: blur(4px);
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: .95rem;
+    }
+    .primary { background: var(--azul); color: white; }
+    .secondary { background: #d9e2ec; color: #102a43; }
+    footer {
+      text-align: center;
+      color: #52606d;
+      padding: 18px;
+      font-size: .85rem;
+    }
+    @media (max-width: 760px) {
+      .grid, .grid-3 { grid-template-columns: 1fr; }
+      .actions { justify-content: stretch; }
+      button { width: 100%; }
+    }
+    @media print {
+      body { background: white; }
+      .actions { display: none; }
+      .card { box-shadow: none; page-break-inside: avoid; }
+      header { background: white; color: black; border-bottom: 2px solid #000; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sistematización Evaluación de Seguimiento Segundo Ciclo, Nivel Primario</h1>
+    <p>Instrumento para registrar las cantidades generales por grado, área evaluada, nivel de lectura e indicadores de desempeño.</p>
+  </header>
+
+  <main>
+    <iframe name="iframeEnvio" id="iframeEnvio" style="display:none;"></iframe>
+      <form id="formularioEvaluacion" method="POST" action="https://script.google.com/macros/s/AKfycby34gn4hqhtp9GOh1bwgHky5ua1z3s8S_BV8Wn-YseAbhfVs_HjkYmgdCT74u9kDRPN/exec" target="iframeEnvio" novalidate>
+        <input type="hidden" id="fecha_envio" name="fecha_envio" />
+        <input type="hidden" id="origen" name="origen" value="Formulario HTML Segundo Ciclo Marzo" />
+      <section class="card">
+        <h2>Datos generales del centro educativo</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="correo" class="required">Correo</label>
+            <input type="email" id="correo" name="correo" required />
+          </div>
+          <div class="field">
+            <label for="sigerd" class="required">Código SIGERD del centro educativo</label>
+            <input type="text" id="sigerd" name="sigerd" pattern="\d{5}" maxlength="5" inputmode="numeric" required />
+            <div class="help">Debe contener exactamente 5 dígitos.</div><div id="centroStatus" class="help"></div>
+          </div>
+          <div class="field">
+            <label for="centro" class="required">Nombre completo del centro educativo</label>
+            <input type="text" id="centro" name="centro" required readonly />
+          </div>
+          <div class="field">
+            <label for="regional" class="required">Seleccione su Regional</label>
+            <select id="regional" name="regional" required>
+              <option value="">Seleccione...</option>
+              <option value="01 - BARAHONA">01 - BARAHONA</option>
+<option value="02 - SAN JUAN DE LA MAGUANA">02 - SAN JUAN DE LA MAGUANA</option>
+<option value="03 - AZUA">03 - AZUA</option>
+<option value="04 - SAN CRISTOBAL">04 - SAN CRISTOBAL</option>
+<option value="05 - SAN PEDRO DE MACORIS">05 - SAN PEDRO DE MACORIS</option>
+<option value="06 - LA VEGA">06 - LA VEGA</option>
+<option value="07 - SAN FRANCISCO DE MACORIS">07 - SAN FRANCISCO DE MACORIS</option>
+<option value="08 - SANTIAGO">08 - SANTIAGO</option>
+<option value="09 - MAO">09 - MAO</option>
+<option value="10 - SANTO DOMINGO">10 - SANTO DOMINGO</option>
+<option value="11 - PUERTO PLATA">11 - PUERTO PLATA</option>
+<option value="12 - HIGÜEY">12 - HIGÜEY</option>
+<option value="13 - MONTE CRISTI">13 - MONTE CRISTI</option>
+<option value="14 - NAGUA">14 - NAGUA</option>
+<option value="15 - SANTO DOMINGO">15 - SANTO DOMINGO</option>
+<option value="16 - COTUÍ">16 - COTUÍ</option>
+<option value="17 - MONTE PLATA">17 - MONTE PLATA</option>
+<option value="18 - BAHORUCO">18 - BAHORUCO</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="distrito" class="required">Seleccione su Distrito Educativo</label>
+            <select id="distrito" name="distrito" required>
+              <option value="">Seleccione...</option>
+              <option value="0101 - PEDERNALES">0101 - PEDERNALES</option>
+<option value="0102 - ENRIQUILLO">0102 - ENRIQUILLO</option>
+<option value="0103 - BARAHONA">0103 - BARAHONA</option>
+<option value="0104 - CABRAL">0104 - CABRAL</option>
+<option value="0105 - VICENTE NOBLE">0105 - VICENTE NOBLE</option>
+<option value="0201 - COMENDADOR">0201 - COMENDADOR</option>
+<option value="0202 - PEDRO SANTANA">0202 - PEDRO SANTANA</option>
+<option value="0203 - LAS MATAS DE FARFÁN">0203 - LAS MATAS DE FARFÁN</option>
+<option value="0204 - EL CERCADO">0204 - EL CERCADO</option>
+<option value="0205 - SAN JUAN ESTE">0205 - SAN JUAN ESTE</option>
+<option value="0206 - SAN JUAN OESTE">0206 - SAN JUAN OESTE</option>
+<option value="0207 - HONDO VALLE">0207 - HONDO VALLE</option>
+<option value="0301 - AZUA">0301 - AZUA</option>
+<option value="0302 - PADRE DE LAS CASAS">0302 - PADRE DE LAS CASAS</option>
+<option value="0303 - SAN JOSÉ DE OCOA">0303 - SAN JOSÉ DE OCOA</option>
+<option value="0304 - BANÍ">0304 - BANÍ</option>
+<option value="0305 - NIZAO">0305 - NIZAO</option>
+<option value="0401 - CAMBITA GARABITOS">0401 - CAMBITA GARABITOS</option>
+<option value="0402 - SAN CRISTOBAL NORTE">0402 - SAN CRISTOBAL NORTE</option>
+<option value="0403 - SAN CRISTOBAL SUR">0403 - SAN CRISTOBAL SUR</option>
+<option value="0404 - VILLA ALTAGRACIA">0404 - VILLA ALTAGRACIA</option>
+<option value="0405 - YAGÜATE">0405 - YAGÜATE</option>
+<option value="0406 - HAINA">0406 - HAINA</option>
+<option value="0407 - SAN GREGORIO DE NIGUA">0407 - SAN GREGORIO DE NIGUA</option>
+<option value="0501 - SAN PEDRO DE MACORIS ESTE">0501 - SAN PEDRO DE MACORIS ESTE</option>
+<option value="0502 - SAN PEDRO DE MACORIS OESTE">0502 - SAN PEDRO DE MACORIS OESTE</option>
+<option value="0503 - LA ROMANA">0503 - LA ROMANA</option>
+<option value="0504 - HATO MAYOR">0504 - HATO MAYOR</option>
+<option value="0505 - SABANA DE LA MAR">0505 - SABANA DE LA MAR</option>
+<option value="0506 - CONSUELO">0506 - CONSUELO</option>
+<option value="0507 - SAN JOSÉ DE LOS LLANOS">0507 - SAN JOSÉ DE LOS LLANOS</option>
+<option value="0508 - QUISQUEYA">0508 - QUISQUEYA</option>
+<option value="0509 - EL VALLE">0509 - EL VALLE</option>
+<option value="0510 - GUAYMATE">0510 - GUAYMATE</option>
+<option value="0511 - VILLA HERMOSA">0511 - VILLA HERMOSA</option>
+<option value="0601 - JOSÉ CONTRERAS">0601 - JOSÉ CONTRERAS</option>
+<option value="0602 - CONSTANZA">0602 - CONSTANZA</option>
+<option value="0603 - JARABACOA">0603 - JARABACOA</option>
+<option value="0604 - LA VEGA OESTE">0604 - LA VEGA OESTE</option>
+<option value="0605 - LA VEGA ESTE">0605 - LA VEGA ESTE</option>
+<option value="0606 - MOCA">0606 - MOCA</option>
+<option value="0607 - GASPAR HERNÁNDEZ">0607 - GASPAR HERNÁNDEZ</option>
+<option value="0608 - JAMAO AL NORTE">0608 - JAMAO AL NORTE</option>
+<option value="0609 - SAN VÍCTOR">0609 - SAN VÍCTOR</option>
+<option value="0610 - JIMA ABAJO">0610 - JIMA ABAJO</option>
+<option value="0701 - TENARES">0701 - TENARES</option>
+<option value="0702 - SALCEDO">0702 - SALCEDO</option>
+<option value="0703 - CASTILLO">0703 - CASTILLO</option>
+<option value="0704 - VILLA RIVA">0704 - VILLA RIVA</option>
+<option value="0705 - SAN FRANCISCO DE MACORIS SUR-E">0705 - SAN FRANCISCO DE MACORIS SUR-E</option>
+<option value="0706 - SAN FRANCISCO DE MACORIS NOR-O">0706 - SAN FRANCISCO DE MACORIS NOR-O</option>
+<option value="0707 - VILLA TAPIA">0707 - VILLA TAPIA</option>
+<option value="0801 - SAN JOSÉ DE LAS MATAS">0801 - SAN JOSÉ DE LAS MATAS</option>
+<option value="0802 - JÁNICO">0802 - JÁNICO</option>
+<option value="0803 - SANTIAGO SUR-ESTE">0803 - SANTIAGO SUR-ESTE</option>
+<option value="0804 - SANTIAGO NOROESTE">0804 - SANTIAGO NOROESTE</option>
+<option value="0805 - SANTIAGO CENTRO-OESTE">0805 - SANTIAGO CENTRO-OESTE</option>
+<option value="0806 - SANTIAGO NORESTE">0806 - SANTIAGO NORESTE</option>
+<option value="0807 - VILLA BISONÓ (NAVARRETE)">0807 - VILLA BISONÓ (NAVARRETE)</option>
+<option value="0808 - LICEY AL MEDIO">0808 - LICEY AL MEDIO</option>
+<option value="0809 - TAMBORIL">0809 - TAMBORIL</option>
+<option value="0810 - VILLA GONZÁLEZ">0810 - VILLA GONZÁLEZ</option>
+<option value="0901 - MAO">0901 - MAO</option>
+<option value="0902 - ESPERANZA">0902 - ESPERANZA</option>
+<option value="0903 - SAN IGNACIO DE SABANETA">0903 - SAN IGNACIO DE SABANETA</option>
+<option value="0904 - MONCIÓN">0904 - MONCIÓN</option>
+<option value="0905 - LAGUNA SALADA">0905 - LAGUNA SALADA</option>
+<option value="0906 - VILLA LOS ALMÁCIGOS">0906 - VILLA LOS ALMÁCIGOS</option>
+<option value="1001 - VILLA MELLA">1001 - VILLA MELLA</option>
+<option value="1002 - SABANA PERDIDA">1002 - SABANA PERDIDA</option>
+<option value="1003 - SANTO DOMINGO NORESTE">1003 - SANTO DOMINGO NORESTE</option>
+<option value="1004 - SANTO DOMINGO ORIENTAL">1004 - SANTO DOMINGO ORIENTAL</option>
+<option value="1005 - BOCA CHICA">1005 - BOCA CHICA</option>
+<option value="1006 - MENDOZA">1006 - MENDOZA</option>
+<option value="1007 - SAN ANTONIO DE GUERRA">1007 - SAN ANTONIO DE GUERRA</option>
+<option value="1101 - SOSUA">1101 - SOSUA</option>
+<option value="1102 - PUERTO PLATA">1102 - PUERTO PLATA</option>
+<option value="1103 - IMBERT">1103 - IMBERT</option>
+<option value="1104 - LUPERÓN">1104 - LUPERÓN</option>
+<option value="1105 - ALTAMIRA">1105 - ALTAMIRA</option>
+<option value="1106 - EL MAMEY">1106 - EL MAMEY</option>
+<option value="1107 - VILLA ISABELA">1107 - VILLA ISABELA</option>
+<option value="1201 - HIGÜEY">1201 - HIGÜEY</option>
+<option value="1202 - SAN RAFAEL DEL YUMA">1202 - SAN RAFAEL DEL YUMA</option>
+<option value="1203 - EL SEIBO">1203 - EL SEIBO</option>
+<option value="1204 - MICHES">1204 - MICHES</option>
+<option value="1301 - MONTE CRISTI">1301 - MONTE CRISTI</option>
+<option value="1302 - GUAYUBÍN">1302 - GUAYUBÍN</option>
+<option value="1303 - VILLA VÁSQUEZ">1303 - VILLA VÁSQUEZ</option>
+<option value="1304 - DAJABÓN">1304 - DAJABÓN</option>
+<option value="1305 - LOMA DE CABRERA">1305 - LOMA DE CABRERA</option>
+<option value="1306 - RESTAURACIÓN">1306 - RESTAURACIÓN</option>
+<option value="1401 - NAGUA">1401 - NAGUA</option>
+<option value="1402 - CABRERA">1402 - CABRERA</option>
+<option value="1403 - RÍO SAN JUAN">1403 - RÍO SAN JUAN</option>
+<option value="1404 - SAMANÁ">1404 - SAMANÁ</option>
+<option value="1405 - SÁNCHEZ">1405 - SÁNCHEZ</option>
+<option value="1406 - EL FACTOR">1406 - EL FACTOR</option>
+<option value="1407 - LAS TERRENAS">1407 - LAS TERRENAS</option>
+<option value="1501 - LOS ALCARRIZOS">1501 - LOS ALCARRIZOS</option>
+<option value="1502 - SANTO DOMINGO CENTRO">1502 - SANTO DOMINGO CENTRO</option>
+<option value="1503 - SANTO DOMINGO SURCENTRAL">1503 - SANTO DOMINGO SURCENTRAL</option>
+<option value="1504 - SANTO DOMINGO NOROESTE">1504 - SANTO DOMINGO NOROESTE</option>
+<option value="1505 - HERRERA">1505 - HERRERA</option>
+<option value="1506 - PEDRO BRAND">1506 - PEDRO BRAND</option>
+<option value="1601 - COTUI">1601 - COTUI</option>
+<option value="1602 - FANTINO">1602 - FANTINO</option>
+<option value="1603 - CEVICOS">1603 - CEVICOS</option>
+<option value="1604 - BONAO SUROESTE">1604 - BONAO SUROESTE</option>
+<option value="1605 - PIEDRA BLANCA">1605 - PIEDRA BLANCA</option>
+<option value="1606 - BONAO NORDESTE">1606 - BONAO NORDESTE</option>
+<option value="1607 - VILLA LA MATA">1607 - VILLA LA MATA</option>
+<option value="1701 - YAMASÁ">1701 - YAMASÁ</option>
+<option value="1702 - MONTE PLATA">1702 - MONTE PLATA</option>
+<option value="1703 - BAYAGUANA">1703 - BAYAGUANA</option>
+<option value="1704 - SABANA GRANDE DE BOYA">1704 - SABANA GRANDE DE BOYA</option>
+<option value="1705 - PERALVILLO">1705 - PERALVILLO</option>
+<option value="1801 - NEIBA">1801 - NEIBA</option>
+<option value="1802 - TAMAYO">1802 - TAMAYO</option>
+<option value="1803 - VILLA JARAGUA">1803 - VILLA JARAGUA</option>
+<option value="1804 - JIMANÍ">1804 - JIMANÍ</option>
+<option value="1805 - DUVERGÉ">1805 - DUVERGÉ</option>
+            </select>
+          </div>
+          
+          <div class="field">
+            <label for="sector" class="required">Sector</label>
+            <input type="text" id="sector" name="sector" readonly required />
+            <div class="help">Se completa automáticamente al escribir el código SIGERD.</div>
+          </div>
+<div class="field">
+            <label for="tipo" class="required">Tipo</label>
+            <select id="tipo" name="tipo" required>
+              <option value="">Seleccione...</option>
+              <option>Regular</option>
+              <option>Multigrado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="tanda" class="required">Tanda del centro</label>
+            <select id="tanda" name="tanda" required>
+              <option value="">Seleccione...</option>
+              <option>Matutina</option>
+              <option>Vespertina</option>
+              <option>Jornada escolar extendida</option>
+            </select>
+            <div class="help">Si el centro es matutino y vespertino, debe llenarse el formulario por cada tanda.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Matrícula por grado</h2>
+        <div class="grid-3">
+          <div class="field">
+            <label for="matricula_g4" class="required">Cantidad de niños inscritos en cuarto grado</label>
+            <input type="number" id="matricula_g4" name="matricula_g4" min="0" step="1" required />
+          </div>
+          <div class="field">
+            <label for="matricula_g5" class="required">Cantidad de niños inscritos en quinto grado</label>
+            <input type="number" id="matricula_g5" name="matricula_g5" min="0" step="1" required />
+          </div>
+          <div class="field">
+            <label for="matricula_g6" class="required">Cantidad de niños inscritos en sexto grado</label>
+            <input type="number" id="matricula_g6" name="matricula_g6" min="0" step="1" required />
+          </div>
+        </div>
+      </section>
+
+      <div id="globalError" class="global-error">Revise el formulario: hay uno o más indicadores cuya suma excede la matrícula del grado correspondiente.</div>
+      <div id="sectionsContainer"></div>
+
+      <div class="actions">
+        <button type="button" class="secondary" onclick="window.print()">Imprimir / Guardar PDF</button>
+        <button type="reset" class="secondary">Limpiar formulario</button>
+        <button type="submit" class="primary" id="btnEnviar">Validar y enviar</button>
+      </div>
+    </form>
+  </main>
+
+  <footer>
+    Formulario HTML basado en el instrumento de marzo 2026 para el Segundo Ciclo del Nivel Primario.
+  </footer>
+
+  <script>
+    // PEGUE AQUÍ LA URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT.
+    // Debe terminar normalmente en /exec
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby34gn4hqhtp9GOh1bwgHky5ua1z3s8S_BV8Wn-YseAbhfVs_HjkYmgdCT74u9kDRPN/exec"; // Debe coincidir con el action del formulario
+
+    const sections = [{"title": "Cuarto Grado Lengua Española", "grade": 4, "type": "LE", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Reconoce el género textual y el propósito comunicativo.", "fields": ["G4-LE-IND1.1 (E)", "G4-LE-IND1.1 (A)", "G4-LE-IND1.1 (S)"]}, {"label": "Indicador 1.2. Infiere información explícita y no explícita considerando el contexto y el propósito.", "fields": ["G4-LE-IND1.2 (E)", "G4-LE-IND1.2 (A)", "G4-LE-IND1.2 (S)"]}, {"label": "Indicador 1.3. Evalúa la pertinencia del género y los recursos usados.", "fields": ["G4-LE-IND1.3 (E)", "G4-LE-IND1.3 (A)", "G4-LE-IND1.3 (S)"]}, {"label": "Indicador 2.1. Redacta textos con claridad, cohesión y corrección ortográfica, apegado a su función y estructura del texto que lee.", "fields": ["G4-LE-IND2.1 (E)", "G4-LE-IND2.1 (A)", "G4-LE-IND2.1 (S)"]}, {"label": "Indicador 2.2. Infiere relaciones causa–efecto y formula explicaciones a partir del texto que lee.", "fields": ["G4-LE-IND2.2 (E)", "G4-LE-IND2.2 (A)", "G4-LE-IND2.2 (S)"]}, {"label": "Indicador 2.3. Argumenta propuestas de solución con el género textual adecuado a partir del texto que lee.", "fields": ["G4-LE-IND2.3 (E)", "G4-LE-IND2.3 (A)", "G4-LE-IND2.3 (S)"]}]}, {"title": "Cuarto Grado Matemática", "grade": 4, "type": "MA", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Representa información con expresiones numéricas, gráficas o simbólicas.", "fields": ["G4-MA-IND1.1 (E)", "G4-MA-IND1.1 (A)", "G4-MA-IND1.1 (S)"]}, {"label": "Indicador 1.2. Interpreta representaciones para explicar ideas o resultados.", "fields": ["G4-MA-IND1.2 (E)", "G4-MA-IND1.2 (A)", "G4-MA-IND1.2 (S)"]}, {"label": "Indicador 1.3. Compara representaciones y valora su adecuación.", "fields": ["G4-MA-IND1.3 (E)", "G4-MA-IND1.3 (A)", "G4-MA-IND1.3 (S)"]}, {"label": "Indicador 2.1. Identifica datos y relaciones relevantes en un problema.", "fields": ["G4-MA-IND2.1 (E)", "G4-MA-IND2.1 (A)", "G4-MA-IND2.1 (S)"]}, {"label": "Indicador 2.2. Aplica el procedimiento matemático adecuado.", "fields": ["G4-MA-IND2.2 (E)", "G4-MA-IND2.2 (A)", "G4-MA-IND2.2 (S)"]}, {"label": "Indicador 2.3. Verifica la coherencia del resultado.", "fields": ["G4-MA-IND2.3 (E)", "G4-MA-IND2.3 (A)", "G4-MA-IND2.3 (S)"]}]}, {"title": "Cuarto Grado Ciencias Sociales", "grade": 4, "type": "CS", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica tipos de fuentes sobre geografía e historia del Caribe.", "fields": ["G4-CS-IND1.1 (E)", "G4-CS-IND1.1 (A)", "G4-CS-IND1.1 (S)"]}, {"label": "Indicador 1.2. Aplica criterios de confiabilidad de una fuente sobre la geografía e historia de Las Antillas.", "fields": ["G4-CS-IND1.2 (E)", "G4-CS-IND1.2 (A)", "G4-CS-IND1.2 (S)"]}, {"label": "Indicador 1.3. Interpreta información de fuentes confiables (mapas, tablas, cronologías) sobre el Caribe.", "fields": ["G4-CS-IND1.3 (E)", "G4-CS-IND1.3 (A)", "G4-CS-IND1.3 (S)"]}, {"label": "Indicador 2.1. Reconoce hechos y períodos relevantes del Caribe y las Antillas, relacionándolos con sus causas.", "fields": ["G4-CS-IND2.1 (E)", "G4-CS-IND2.1 (A)", "G4-CS-IND2.1 (S)"]}, {"label": "Indicador 2.2. Identifica y relaciona problemas, causas o consecuencias relacionadas con los hechos.", "fields": ["G4-CS-IND2.2 (E)", "G4-CS-IND2.2 (A)", "G4-CS-IND2.2 (S)"]}, {"label": "Indicador 2.3. Relaciona hechos y personas o habitantes con lugares geográficos donde ocurrieron o relacionados.", "fields": ["G4-CS-IND2.3 (E)", "G4-CS-IND2.3 (A)", "G4-CS-IND2.3 (S)"]}]}, {"title": "Cuarto Grado Ciencias de la Naturaleza", "grade": 4, "type": "CN", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Formula preguntas e hipótesis en los procesos y estructuras de ciencias de la vida a partir de observaciones/modelos.", "fields": ["G4-CN-IND1.1 (E)", "G4-CN-IND1.1 (A)", "G4-CN-IND1.1 (S)"]}, {"label": "Indicador 1.2. Analiza y aplica ideas y conceptos sobre fenómenos y propiedades en ciencias físicas mediante medición/modelos.", "fields": ["G4-CN-IND1.2 (E)", "G4-CN-IND1.2 (A)", "G4-CN-IND1.2 (S)"]}, {"label": "Indicador 1.3. Explica fenómenos de la Tierra y el universo usando observaciones/modelos.", "fields": ["G4-CN-IND1.3 (E)", "G4-CN-IND1.3 (A)", "G4-CN-IND1.3 (S)"]}, {"label": "Indicador 2.1. Reconoce y ordena pasos básicos de procedimientos científicos/tecnológicos.", "fields": ["G4-CN-IND2.1 (E)", "G4-CN-IND2.1 (A)", "G4-CN-IND2.1 (S)"]}, {"label": "Indicador 2.2. Aplica instrumentos y materiales de forma adecuada en experimentos, proyectos, exploraciones y observaciones guiadas.", "fields": ["G4-CN-IND2.2 (E)", "G4-CN-IND2.2 (A)", "G4-CN-IND2.2 (S)"]}]}, {"title": "Quinto Grado Lengua Española", "grade": 5, "type": "LE", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica información explícita e implícita en textos que lee.", "fields": ["G5-LE-IND1.1 (E)", "G5-LE-IND1.1 (A)", "G5-LE-IND1.1 (S)"]}, {"label": "Indicador 1.2. Analiza recursos lingüísticos y organizativos del texto que lee para comprender mejor su sentido.", "fields": ["G5-LE-IND1.2 (E)", "G5-LE-IND1.2 (A)", "G5-LE-IND1.2 (S)"]}, {"label": "Indicador 1.3. Valora críticamente la información y emite juicios fundamentados a partir del texto que lee.", "fields": ["G5-LE-IND1.3 (E)", "G5-LE-IND1.3 (A)", "G5-LE-IND1.3 (S)"]}, {"label": "Indicador 2.1. Organiza por escrito información e ideas de manera coherente.", "fields": ["G5-LE-IND2.1 (E)", "G5-LE-IND2.1 (A)", "G5-LE-IND2.1 (S)"]}, {"label": "Indicador 2.2. Redacta textos relacionados con el texto que lee.", "fields": ["G5-LE-IND2.2 (E)", "G5-LE-IND2.2 (A)", "G5-LE-IND2.2 (S)"]}, {"label": "Indicador 2.3. Presenta conclusiones y propuestas con base en información analizada relacionada con el texto que lee.", "fields": ["G5-LE-IND2.3 (E)", "G5-LE-IND2.3 (A)", "G5-LE-IND2.3 (S)"]}]}, {"title": "Quinto Grado Matemática", "grade": 5, "type": "MA", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Comprende y usa el sistema de numeración decimal.", "fields": ["G5-MA-IND1.1 (E)", "G5-MA-IND1.1 (A)", "G5-MA-IND1.1 (S)"]}, {"label": "Indicador 1.2. Resuelve operaciones con números naturales, fracciones y decimales en contextos cotidianos.", "fields": ["G5-MA-IND1.2 (E)", "G5-MA-IND1.2 (A)", "G5-MA-IND1.2 (S)"]}, {"label": "Indicador 1.3. Interpreta y organiza información numérica y de medidas mediante tablas y gráficos.", "fields": ["G5-MA-IND1.3 (E)", "G5-MA-IND1.3 (A)", "G5-MA-IND1.3 (S)"]}, {"label": "Indicador 2.1. Resuelve problemas de proporcionalidad y razones.", "fields": ["G5-MA-IND2.1 (E)", "G5-MA-IND2.1 (A)", "G5-MA-IND2.1 (S)"]}, {"label": "Indicador 2.2. Analiza e interpreta representaciones (tablas, gráficos, patrones) para modelar relaciones.", "fields": ["G5-MA-IND2.2 (E)", "G5-MA-IND2.2 (A)", "G5-MA-IND2.2 (S)"]}, {"label": "Indicador 2.3. Utiliza nociones geométricas y de medición para resolver problemas espaciales.", "fields": ["G5-MA-IND2.3 (E)", "G5-MA-IND2.3 (A)", "G5-MA-IND2.3 (S)"]}]}, {"title": "Quinto Grado Ciencias Sociales", "grade": 5, "type": "CS", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica tipos de fuentes, autor y fecha de autoría sobre geografía e historia del Caribe y las Antillas.", "fields": ["G5-CS-IND1.1 (E)", "G5-CS-IND1.1 (A)", "G5-CS-IND1.1 (S)"]}, {"label": "Indicador 1.2. Aplica criterios de confiabilidad e interpreta fuentes de información en Geografía e identifica el globo terráqueo identificando el Meridiano de Greenwich y el Paralelo del Ecuador.", "fields": ["G5-CS-IND1.2 (E)", "G5-CS-IND1.2 (A)", "G5-CS-IND1.2 (S)"]}, {"label": "Indicador 1.3. Ubica en una fuente de información confiable (mapas, tablas, cronologías) una masa continental y un país.", "fields": ["G5-CS-IND1.3 (E)", "G5-CS-IND1.3 (A)", "G5-CS-IND1.3 (S)"]}, {"label": "Indicador 2.1. Identifica acontecimientos y personajes históricos ocurridos en América en un determinado periodo.", "fields": ["G5-CS-IND2.1 (E)", "G5-CS-IND2.1 (A)", "G5-CS-IND2.1 (S)"]}, {"label": "Indicador 2.2. Identifica fenómenos de la Geografía y acontecimientos históricos del Caribe.", "fields": ["G5-CS-IND2.2 (E)", "G5-CS-IND2.2 (A)", "G5-CS-IND2.2 (S)"]}, {"label": "Indicador 2.3. Analiza de manera crítica y lógica acontecimientos históricos y fenómenos geográficos de la República Dominicana.", "fields": ["G5-CS-IND2.3 (E)", "G5-CS-IND2.3 (A)", "G5-CS-IND2.3 (S)"]}]}, {"title": "Quinto Grado Ciencias de la Naturaleza", "grade": 5, "type": "CN", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Analiza y describe procesos y estructuras de los seres vivos a partir de observaciones o modelos, estableciendo relaciones entre sus funciones y el entorno en Ciencias de la Vida.", "fields": ["G5-CN-IND1.1 (E)", "G5-CN-IND1.1 (A)", "G5-CN-IND1.1 (S)"]}, {"label": "Indicador 1.2. Interpreta y compara procesos y estructuras de la materia y la energía a partir de observaciones, experimentos o modelos, identificando causas y efectos en los fenómenos en Ciencias Físicas.", "fields": ["G5-CN-IND1.2 (E)", "G5-CN-IND1.2 (A)", "G5-CN-IND1.2 (S)"]}, {"label": "Indicador 1.3. Relaciona y argumenta fenómenos de la Tierra y del universo a partir de observaciones, modelos o representaciones, formulando ideas sobre sus causas y transformaciones.", "fields": ["G5-CN-IND1.3 (E)", "G5-CN-IND1.3 (A)", "G5-CN-IND1.3 (S)"]}, {"label": "Indicador 2.1. Analiza y describe procesos y estructuras de los seres vivos a partir de observaciones o modelos, valorando su relación con las funciones vitales y el ambiente en Ciencias de la Vida.", "fields": ["G5-CN-IND2.1 (E)", "G5-CN-IND2.1 (A)", "G5-CN-IND2.1 (S)"]}, {"label": "Indicador 2.2. Interpreta y compara procesos y estructuras vinculados con la materia, la energía y sus transformaciones a partir de observaciones, mediciones o modelos experimentales en Ciencias Físicas.", "fields": ["G5-CN-IND2.2 (E)", "G5-CN-IND2.2 (A)", "G5-CN-IND2.2 (S)"]}, {"label": "Indicador 2.3. Relaciona y argumenta fenómenos de la Tierra y del universo a partir de observaciones, modelos o simulaciones, formulando inferencias sobre sus causas y efectos.", "fields": ["G5-CN-IND2.3 (E)", "G5-CN-IND2.3 (A)", "G5-CN-IND2.3 (S)"]}]}, {"title": "Sexto Grado Lengua Española", "grade": 6, "type": "LE", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica información explícita e implícita en textos diversos.", "fields": ["G6-LE-IND1.1 (E)", "G6-LE-IND1.1 (A)", "G6-LE-IND1.1 (S)"]}, {"label": "Indicador 1.2. Analiza recursos lingüísticos y organizativos del texto que lee para comprender mejor su sentido.", "fields": ["G6-LE-IND1.2 (E)", "G6-LE-IND1.2 (A)", "G6-LE-IND1.2 (S)"]}, {"label": "Indicador 1.3. Valora críticamente la información y emite juicios fundamentados.", "fields": ["G6-LE-IND1.3 (E)", "G6-LE-IND1.3 (A)", "G6-LE-IND1.3 (S)"]}, {"label": "Indicador 2.1. Expresa por escrito ideas y resultados de manera lógica, crítica con claridad y coherencia, a través de diversos textos.", "fields": ["G6-LE-IND2.1 (E)", "G6-LE-IND2.1 (A)", "G6-LE-IND2.1 (S)"]}, {"label": "Indicador 2.2. Emplea normas gramaticales y ortográficas al escribir diversos textos.", "fields": ["G6-LE-IND2.2 (E)", "G6-LE-IND2.2 (A)", "G6-LE-IND2.2 (S)"]}, {"label": "Indicador 2.3. Integra recursos lingüísticos y discursivos al escribir diversos textos.", "fields": ["G6-LE-IND2.3 (E)", "G6-LE-IND2.3 (A)", "G6-LE-IND2.3 (S)"]}]}, {"title": "Sexto Grado Matemática", "grade": 6, "type": "MA", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Comunica ideas matemáticas de manera clara.", "fields": ["G6-MA-IND1.1 (E)", "G6-MA-IND1.1 (A)", "G6-MA-IND1.1 (S)"]}, {"label": "Indicador 1.2. Argumenta procedimientos y resultados.", "fields": ["G6-MA-IND1.2 (E)", "G6-MA-IND1.2 (A)", "G6-MA-IND1.2 (S)"]}, {"label": "Indicador 1.3. Utiliza representaciones matemáticas adecuadas.", "fields": ["G6-MA-IND1.3 (E)", "G6-MA-IND1.3 (A)", "G6-MA-IND1.3 (S)"]}, {"label": "Indicador 2.1. Emplea procedimientos adecuados para resolver problemas.", "fields": ["G6-MA-IND2.1 (E)", "G6-MA-IND2.1 (A)", "G6-MA-IND2.1 (S)"]}, {"label": "Indicador 2.2. Valora la utilidad de la matemática en situaciones reales.", "fields": ["G6-MA-IND2.2 (E)", "G6-MA-IND2.2 (A)", "G6-MA-IND2.2 (S)"]}, {"label": "Indicador 3.1. Representa situaciones de su entorno mediante modelos matemáticos.", "fields": ["G6-MA-IND3.1 (E)", "G6-MA-IND3.1 (A)", "G6-MA-IND3.1 (S)"]}, {"label": "Indicador 3.2. Valida el modelo propuesto con los datos.", "fields": ["G6-MA-IND3.2 (E)", "G6-MA-IND3.2 (A)", "G6-MA-IND3.2 (S)"]}]}, {"title": "Sexto Grado Ciencias Sociales", "grade": 6, "type": "CS", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Reconoce fuentes confiables y la autoría en informaciones geográficas e históricas.", "fields": ["G6-CS-IND1.1 (E)", "G6-CS-IND1.1 (A)", "G6-CS-IND1.1 (S)"]}, {"label": "Indicador 1.2. Distingue la clasificación e importancia de la geografía (física, humana, económica).", "fields": ["G6-CS-IND1.2 (E)", "G6-CS-IND1.2 (A)", "G6-CS-IND1.2 (S)"]}, {"label": "Indicador 1.3. Analiza informaciones sobre civilizaciones antiguas y modernas y sus aportes.", "fields": ["G6-CS-IND1.3 (E)", "G6-CS-IND1.3 (A)", "G6-CS-IND1.3 (S)"]}, {"label": "Indicador 2.1. Identifica acontecimientos históricos relacionados con las civilizaciones antiguas y modernas, historia de América, y causas y consecuencias de procesos históricos relevantes.", "fields": ["G6-CS-IND2.1 (E)", "G6-CS-IND2.1 (A)", "G6-CS-IND2.1 (S)"]}, {"label": "Indicador 2.2. Analiza hechos históricos del periodo estudiado vinculados a situaciones sociales, económicas y culturales del mundo y de la República Dominicana.", "fields": ["G6-CS-IND2.2 (E)", "G6-CS-IND2.2 (A)", "G6-CS-IND2.2 (S)"]}, {"label": "Indicador 2.3. Evalúa valoraciones críticas fundamentadas en información histórica confiable.", "fields": ["G6-CS-IND2.3 (E)", "G6-CS-IND2.3 (A)", "G6-CS-IND2.3 (S)"]}]}, {"title": "Sexto Grado Ciencias de la Naturaleza", "grade": 6, "type": "CN", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Formula preguntas e hipótesis a partir de observaciones en el entorno y experimentos realizados en Ciencias de la Vida.", "fields": ["G6-CN-IND1.1 (E)", "G6-CN-IND1.1 (A)", "G6-CN-IND1.1 (S)"]}, {"label": "Indicador 1.2. Aplica ideas y conceptos en Ciencias Física a partir de experimentos y diseño de proyectos.", "fields": ["G6-CN-IND1.2 (E)", "G6-CN-IND1.2 (A)", "G6-CN-IND1.2 (S)"]}, {"label": "Indicador 1.3. Explica fenómenos mediante modelos y representaciones en Ciencias de la Tierra y el Universo.", "fields": ["G6-CN-IND1.3 (E)", "G6-CN-IND1.3 (A)", "G6-CN-IND1.3 (S)"]}, {"label": "Indicador 2.1. Organiza y ejecuta procedimientos científicos experimentales.", "fields": ["G6-CN-IND2.1 (E)", "G6-CN-IND2.1 (A)", "G6-CN-IND2.1 (S)"]}, {"label": "Indicador 2.2. Analiza e interpreta datos de exploraciones o experimentos, teorías y principios científicos para interpretar fenómenos.", "fields": ["G6-CN-IND2.2 (E)", "G6-CN-IND2.2 (A)", "G6-CN-IND2.2 (S)"]}]}];
+
+    const container = document.getElementById("sectionsContainer");
+
+    function slug(text) {
+      return text
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9]+/g, "_")
+        .replace(/^_|_$/g, "")
+        .toLowerCase();
+    }
+
+    function getMatricula(grade) {
+      const value = Number(document.getElementById(`matricula_g${grade}`).value || 0);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function makeInput(field, grade, groupId) {
+      const id = slug(field);
+      return `
+        <div class="field">
+          <label for="${id}" class="required">${field}</label>
+          <input type="number" id="${id}" name="${id}" min="0" step="1" required
+                 data-grade="${grade}" data-group="${groupId}" />
+        </div>`;
+    }
+
+    function renderSections() {
+      container.innerHTML = sections.map((section, sIndex) => {
+        const groups = section.groups.map((group, gIndex) => {
+          const groupId = `sec${sIndex}_grp${gIndex}`;
+          return `
+            <div class="indicator-group" data-group-box="${groupId}" data-grade="${section.grade}">
+              <div class="indicator-title">${group.label}</div>
+              <div class="grid-3">
+                ${group.fields.map(field => makeInput(field, section.grade, groupId)).join("")}
+              </div>
+              <div class="sum-line" id="sum_${groupId}">
+                <span>Suma registrada: <strong class="sum-value">0</strong></span>
+                <span>Matrícula del grado: <strong class="matricula-value">0</strong></span>
+              </div>
+              <div class="error-msg" id="error_${groupId}">
+                La suma de este bloque no puede ser mayor que la matrícula del grado.
+              </div>
+            </div>`;
+        }).join("");
+
+        return `
+          <section class="card">
+            <h2>${section.title}</h2>
+            <div class="section-description">${section.description}</div>
+            ${groups}
+          </section>`;
+      }).join("");
+    }
+
+    function validateGroup(groupId) {
+      const inputs = Array.from(document.querySelectorAll(`[data-group="${groupId}"]`));
+      if (!inputs.length) return true;
+
+      const grade = inputs[0].dataset.grade;
+      const matricula = getMatricula(grade);
+      const sum = inputs.reduce((acc, input) => acc + Number(input.value || 0), 0);
+
+      const line = document.getElementById(`sum_${groupId}`);
+      const err = document.getElementById(`error_${groupId}`);
+      line.querySelector(".sum-value").textContent = sum;
+      line.querySelector(".matricula-value").textContent = matricula;
+
+      line.classList.remove("error", "warning");
+      inputs.forEach(input => input.setCustomValidity(""));
+
+      if (sum > matricula) {
+        line.classList.add("error");
+        err.style.display = "block";
+        inputs.forEach(input => input.setCustomValidity("La suma de este bloque excede la matrícula del grado."));
+        return false;
+      }
+
+      if (matricula > 0 && sum < matricula) {
+        line.classList.add("warning");
+        err.style.display = "none";
+        return true;
+      }
+
+      err.style.display = "none";
+      return true;
+    }
+
+    function validateAllGroups() {
+      const groupIds = [...new Set(Array.from(document.querySelectorAll("[data-group]")).map(i => i.dataset.group))];
+      const ok = groupIds.every(validateGroup);
+      document.getElementById("globalError").style.display = ok ? "none" : "block";
+      return ok;
+    }
+
+
+    async function autocompletarCentroPorCodigo() {
+      const sigerdInput = document.getElementById("sigerd");
+      const codigo = sigerdInput.value.trim();
+      const status = document.getElementById("centroStatus");
+
+      if (codigo.length === 0) {
+        limpiarDatosCentro();
+        status.textContent = "";
+        status.className = "help";
+        return;
+      }
+
+      if (!/^\d{5}$/.test(codigo)) {
+        limpiarDatosCentro();
+        status.textContent = "Digite un código SIGERD válido de 5 dígitos.";
+        status.className = "help centro-error";
+        return;
+      }
+
+      status.textContent = "Buscando centro...";
+      status.className = "help";
+
+      try {
+        const response = await fetch(SCRIPT_URL + "?codigo=" + encodeURIComponent(codigo));
+        const result = await response.json();
+
+        if (result.status === "success" && result.data) {
+          document.getElementById("centro").value = result.data.centro || "";
+          document.getElementById("regional").value = result.data.regional || "";
+          document.getElementById("distrito").value = result.data.distrito || "";
+          document.getElementById("sector").value = result.data.sector || "";
+
+          status.textContent = "Centro encontrado y datos completados automáticamente.";
+          status.className = "help centro-ok";
+        } else {
+          limpiarDatosCentro();
+          status.textContent = "No se encontró un centro con ese código SIGERD.";
+          status.className = "help centro-error";
+        }
+      } catch (error) {
+        limpiarDatosCentro();
+        status.textContent = "No fue posible consultar la hoja Centros. Revise la implementación de Apps Script.";
+        status.className = "help centro-error";
+        console.error(error);
+      }
+    }
+
+    function limpiarDatosCentro() {
+      document.getElementById("centro").value = "";
+      document.getElementById("regional").value = "";
+      document.getElementById("distrito").value = "";
+      const sector = document.getElementById("sector");
+      if (sector) sector.value = "";
+    }
+
+    document.getElementById("sigerd").addEventListener("input", autocompletarCentroPorCodigo);
+
+    renderSections();
+
+    document.addEventListener("input", event => {
+      if (event.target.matches("input[type='number']")) {
+        const value = Number(event.target.value);
+        if (value < 0) event.target.value = 0;
+        if (event.target.dataset.group) {
+          validateGroup(event.target.dataset.group);
+        } else {
+          validateAllGroups();
+        }
+      }
+    });
+
+    document.getElementById("formularioEvaluacion").addEventListener("submit", event => {
+      event.preventDefault();
+
+      const form = event.currentTarget;
+      const validSums = validateAllGroups();
+
+      const codigoValido = /^\d{5}$/.test(document.getElementById("sigerd").value.trim());
+      const centroEncontrado = document.getElementById("centro").value.trim() !== "";
+
+      if (!codigoValido) {
+        alert("Debe digitar un código SIGERD válido de 5 dígitos.");
+        document.getElementById("sigerd").focus();
+        return;
+      }
+
+      if (!centroEncontrado) {
+        alert("El código SIGERD no está registrado en la hoja Centros o no se ha completado el autollenado.");
+        document.getElementById("sigerd").focus();
+        return;
+      }
+
+      if (!form.checkValidity() || !validSums) {
+        form.reportValidity();
+        return;
+      }
+
+      document.getElementById("fecha_envio").value = new Date().toISOString();
+
+      const btn = document.getElementById("btnEnviar");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Enviando...";
+      }
+
+      form.submit();
+
+      setTimeout(() => {
+        alert("CENTRO REGISTRADO CORRECTAMENTE.");
+        form.reset();
+        validateAllGroups();
+        const status = document.getElementById("centroStatus");
+        if (status) {
+          status.textContent = "";
+          status.className = "help";
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Validar y enviar";
+        }
+      }, 1200);
+    });
+
+    document.getElementById("formularioEvaluacion").addEventListener("reset", () => {
+      setTimeout(validateAllGroups, 0);
+    });
+
+    validateAllGroups();
+  </script>
+</body>
+</html>
