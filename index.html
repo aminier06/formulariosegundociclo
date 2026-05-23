@@ -181,6 +181,15 @@
       padding: 18px;
       font-size: .85rem;
     }
+
+    .locked-field {
+      background: #eef3f7;
+      color: #334e68;
+      cursor: not-allowed;
+    }
+    select.locked-field {
+      pointer-events: none;
+    }
     @media (max-width: 760px) {
       .grid, .grid-3 { grid-template-columns: 1fr; }
       .actions { justify-content: stretch; }
@@ -223,7 +232,7 @@
           </div>
           <div class="field">
             <label for="regional" class="required">Seleccione su Regional</label>
-            <select id="regional" name="regional" required>
+            <select id="regional" name="regional" required class="locked-field" tabindex="-1" aria-readonly="true" title="Este campo se completa automáticamente con el código SIGERD.">
               <option value="">Seleccione...</option>
               <option value="01 - BARAHONA">01 - BARAHONA</option>
 <option value="02 - SAN JUAN DE LA MAGUANA">02 - SAN JUAN DE LA MAGUANA</option>
@@ -247,7 +256,7 @@
           </div>
           <div class="field">
             <label for="distrito" class="required">Seleccione su Distrito Educativo</label>
-            <select id="distrito" name="distrito" required>
+            <select id="distrito" name="distrito" required class="locked-field" tabindex="-1" aria-readonly="true" title="Este campo se completa automáticamente con el código SIGERD.">
               <option value="">Seleccione...</option>
               <option value="0101 - PEDERNALES">0101 - PEDERNALES</option>
 <option value="0102 - ENRIQUILLO">0102 - ENRIQUILLO</option>
@@ -454,11 +463,20 @@
       return Number.isFinite(value) ? value : 0;
     }
 
+
+    function getVisibleLabel(field) {
+      if (/\(E\)\s*$/.test(field)) return "Elemental";
+      if (/\(A\)\s*$/.test(field)) return "Aceptable";
+      if (/\(S\)\s*$/.test(field)) return "Satisfactorio";
+      return field;
+    }
+
     function makeInput(field, grade, groupId) {
       const id = slug(field);
+      const visibleLabel = getVisibleLabel(field);
       return `
         <div class="field">
-          <label for="${id}" class="required">${field}</label>
+          <label for="${id}" class="required">${visibleLabel}</label>
           <input type="number" id="${id}" name="${id}" min="0" step="1" required
                  data-grade="${grade}" data-group="${groupId}" />
         </div>`;
@@ -590,6 +608,18 @@
     }
 
     document.getElementById("sigerd").addEventListener("input", autocompletarCentroPorCodigo);
+
+
+    ["regional", "distrito"].forEach(id => {
+      const campo = document.getElementById(id);
+      if (!campo) return;
+      campo.addEventListener("mousedown", event => event.preventDefault());
+      campo.addEventListener("keydown", event => event.preventDefault());
+      campo.addEventListener("change", event => {
+        event.preventDefault();
+        campo.blur();
+      });
+    });
 
     renderSections();
 
