@@ -90,6 +90,18 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
     }
+    .matricula-grid .field {
+      display: flex;
+      flex-direction: column;
+    }
+    .matricula-grid label {
+      min-height: 48px;
+      display: flex;
+      align-items: flex-start;
+    }
+    .matricula-grid input {
+      margin-top: auto;
+    }
     .field { margin-bottom: 12px; }
     .help {
       font-size: .86rem;
@@ -261,7 +273,7 @@ select.locked-field {
 
       <section class="card">
         <h2>Matrícula por grado</h2>
-        <div class="grid-3">
+        <div class="grid-3 matricula-grid">
           <div class="field">
             <label for="matricula_g4" class="required">Cantidad de niños inscritos en cuarto grado</label>
             <input type="number" id="matricula_g4" name="matricula_g4" min="0" step="1" required />
