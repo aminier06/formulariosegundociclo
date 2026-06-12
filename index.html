@@ -712,20 +712,11 @@ select.locked-field {
       form.submit();
 
       setTimeout(() => {
-        alert("CENTRO REGISTRADO CORRECTAMENTE.");
-        form.reset();
+        alert("CENTRO REGISTRADO CORRECTAMENTE. Los datos digitados se conservarán en pantalla.");
 
-        document.getElementById("responsable_nombre").value = "";
-        document.getElementById("responsable_cedula").value = "";
-        document.getElementById("responsable_telefono").value = "";
-
+        // Se conservan los valores digitados para que el usuario pueda revisarlos,
+        // imprimirlos o usarlos como base para un nuevo registro.
         validateAllGroups();
-
-        const status = document.getElementById("centroStatus");
-        if (status) {
-          status.textContent = "";
-          status.className = "help";
-        }
 
         if (btn) {
           btn.disabled = false;
