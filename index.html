@@ -166,6 +166,29 @@
       margin-bottom: 16px;
       font-weight: 700;
     }
+    .cierre-aviso {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-left: 5px solid #f97316;
+      color: #7c2d12;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      font-weight: 700;
+      box-shadow: 0 6px 16px rgba(16, 42, 67, .06);
+    }
+    .cierre-aviso.cerrado {
+      background: #fdecea;
+      border-color: #f5b7b1;
+      border-left-color: var(--error);
+      color: var(--error);
+    }
+    .cierre-aviso small {
+      display: block;
+      margin-top: 4px;
+      font-weight: 400;
+      color: inherit;
+    }
     .actions {
       display: flex;
       gap: 12px;
@@ -248,6 +271,7 @@ select.locked-field {
 
   <main>
     <iframe name="iframeEnvio" id="iframeEnvio" style="display:none;"></iframe>
+    <div id="avisoCierreFormulario" class="cierre-aviso" role="status" aria-live="polite"></div>
       <form id="formularioEvaluacion" method="POST" action="https://script.google.com/macros/s/AKfycby34gn4hqhtp9GOh1bwgHky5ua1z3s8S_BV8Wn-YseAbhfVs_HjkYmgdCT74u9kDRPN/exec" target="iframeEnvio" novalidate>
         <input type="hidden" id="fecha_envio" name="fecha_envio" />
         <input type="hidden" id="origen" name="origen" value="Formulario HTML Segundo Ciclo Marzo" />
@@ -327,7 +351,7 @@ select.locked-field {
       <div id="sectionsContainer"></div>
 
       <div class="actions">
-        <button type="button" class="secondary" onclick="window.print()">Imprimir / Guardar PDF</button>
+        <button type="button" class="secondary" id="btnImprimir" onclick="window.print()">Imprimir / Guardar PDF</button>
         <button type="reset" class="secondary">Limpiar formulario</button>
         <button type="submit" class="primary" id="btnEnviar">Validar y enviar</button>
       </div>
@@ -371,6 +395,54 @@ select.locked-field {
     // PEGUE AQUÍ LA URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT.
     // Debe terminar normalmente en /exec
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1Cg8MOE8kSM7n6yOwiuQqTTzQvQ2dix0tACp9v-fV37BRt2Nl3SRLK1AZXg72KcM/exec"; // Debe coincidir con el action del formulario
+
+    // Fecha de cierre del formulario: 12 de junio de 2026, 2:00 p. m.
+    // Se usa la zona horaria de República Dominicana (-04:00).
+    const FECHA_CIERRE_FORMULARIO = new Date("2026-06-12T14:00:00-04:00");
+
+    function formularioEstaCerrado() {
+      return new Date() >= FECHA_CIERRE_FORMULARIO;
+    }
+
+    function formatearTiempoRestante(ms) {
+      if (ms <= 0) return "0 días · 00 h · 00 min · 00 s";
+
+      const totalSegundos = Math.floor(ms / 1000);
+      const dias = Math.floor(totalSegundos / 86400);
+      const horas = Math.floor((totalSegundos % 86400) / 3600);
+      const minutos = Math.floor((totalSegundos % 3600) / 60);
+      const segundos = totalSegundos % 60;
+
+      return `${dias} días · ${String(horas).padStart(2, "0")} h · ${String(minutos).padStart(2, "0")} min · ${String(segundos).padStart(2, "0")} s`;
+    }
+
+    function aplicarEstadoCierreFormulario() {
+      const aviso = document.getElementById("avisoCierreFormulario");
+      const form = document.getElementById("formularioEvaluacion");
+      const btnEnviar = document.getElementById("btnEnviar");
+      if (!aviso || !form) return;
+
+      const restante = FECHA_CIERRE_FORMULARIO - new Date();
+
+      if (restante <= 0) {
+        aviso.classList.add("cerrado");
+        aviso.innerHTML = `Registro cerrado.<small>Este formulario dejó de estar disponible el 12 de junio de 2026 a las 2:00 p. m.</small>`;
+
+        form.querySelectorAll("input, select, textarea").forEach(control => {
+          control.disabled = true;
+        });
+
+        form.querySelectorAll("button").forEach(boton => {
+          if (boton.id !== "btnImprimir") boton.disabled = true;
+        });
+
+        if (btnEnviar) btnEnviar.textContent = "Registro cerrado";
+        return;
+      }
+
+      aviso.classList.remove("cerrado");
+      aviso.innerHTML = `El registro estará disponible hasta el 12 de junio de 2026 a las 2:00 p. m.<small>Tiempo restante: ${formatearTiempoRestante(restante)}</small>`;
+    }
 
     const sections = [{"title": "Cuarto Grado Lengua Española", "grade": 4, "type": "LE", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Reconoce el género textual y el propósito comunicativo.", "fields": ["G4-LE-IND1.1 (E)", "G4-LE-IND1.1 (A)", "G4-LE-IND1.1 (S)"]}, {"label": "Indicador 1.2. Infiere información explícita y no explícita considerando el contexto y el propósito.", "fields": ["G4-LE-IND1.2 (E)", "G4-LE-IND1.2 (A)", "G4-LE-IND1.2 (S)"]}, {"label": "Indicador 1.3. Evalúa la pertinencia del género y los recursos usados.", "fields": ["G4-LE-IND1.3 (E)", "G4-LE-IND1.3 (A)", "G4-LE-IND1.3 (S)"]}, {"label": "Indicador 2.1. Redacta textos con claridad, cohesión y corrección ortográfica, apegado a su función y estructura del texto que lee.", "fields": ["G4-LE-IND2.1 (E)", "G4-LE-IND2.1 (A)", "G4-LE-IND2.1 (S)"]}, {"label": "Indicador 2.2. Infiere relaciones causa–efecto y formula explicaciones a partir del texto que lee.", "fields": ["G4-LE-IND2.2 (E)", "G4-LE-IND2.2 (A)", "G4-LE-IND2.2 (S)"]}, {"label": "Indicador 2.3. Argumenta propuestas de solución con el género textual adecuado a partir del texto que lee.", "fields": ["G4-LE-IND2.3 (E)", "G4-LE-IND2.3 (A)", "G4-LE-IND2.3 (S)"]}]}, {"title": "Cuarto Grado Matemática", "grade": 4, "type": "MA", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Representa información con expresiones numéricas, gráficas o simbólicas.", "fields": ["G4-MA-IND1.1 (E)", "G4-MA-IND1.1 (A)", "G4-MA-IND1.1 (S)"]}, {"label": "Indicador 1.2. Interpreta representaciones para explicar ideas o resultados.", "fields": ["G4-MA-IND1.2 (E)", "G4-MA-IND1.2 (A)", "G4-MA-IND1.2 (S)"]}, {"label": "Indicador 1.3. Compara representaciones y valora su adecuación.", "fields": ["G4-MA-IND1.3 (E)", "G4-MA-IND1.3 (A)", "G4-MA-IND1.3 (S)"]}, {"label": "Indicador 2.1. Identifica datos y relaciones relevantes en un problema.", "fields": ["G4-MA-IND2.1 (E)", "G4-MA-IND2.1 (A)", "G4-MA-IND2.1 (S)"]}, {"label": "Indicador 2.2. Aplica el procedimiento matemático adecuado.", "fields": ["G4-MA-IND2.2 (E)", "G4-MA-IND2.2 (A)", "G4-MA-IND2.2 (S)"]}, {"label": "Indicador 2.3. Verifica la coherencia del resultado.", "fields": ["G4-MA-IND2.3 (E)", "G4-MA-IND2.3 (A)", "G4-MA-IND2.3 (S)"]}]}, {"title": "Cuarto Grado Ciencias Sociales", "grade": 4, "type": "CS", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica tipos de fuentes sobre geografía e historia del Caribe.", "fields": ["G4-CS-IND1.1 (E)", "G4-CS-IND1.1 (A)", "G4-CS-IND1.1 (S)"]}, {"label": "Indicador 1.2. Aplica criterios de confiabilidad de una fuente sobre la geografía e historia de Las Antillas.", "fields": ["G4-CS-IND1.2 (E)", "G4-CS-IND1.2 (A)", "G4-CS-IND1.2 (S)"]}, {"label": "Indicador 1.3. Interpreta información de fuentes confiables (mapas, tablas, cronologías) sobre el Caribe.", "fields": ["G4-CS-IND1.3 (E)", "G4-CS-IND1.3 (A)", "G4-CS-IND1.3 (S)"]}, {"label": "Indicador 2.1. Reconoce hechos y períodos relevantes del Caribe y las Antillas, relacionándolos con sus causas.", "fields": ["G4-CS-IND2.1 (E)", "G4-CS-IND2.1 (A)", "G4-CS-IND2.1 (S)"]}, {"label": "Indicador 2.2. Identifica y relaciona problemas, causas o consecuencias relacionadas con los hechos.", "fields": ["G4-CS-IND2.2 (E)", "G4-CS-IND2.2 (A)", "G4-CS-IND2.2 (S)"]}, {"label": "Indicador 2.3. Relaciona hechos y personas o habitantes con lugares geográficos donde ocurrieron o relacionados.", "fields": ["G4-CS-IND2.3 (E)", "G4-CS-IND2.3 (A)", "G4-CS-IND2.3 (S)"]}]}, {"title": "Cuarto Grado Ciencias de la Naturaleza", "grade": 4, "type": "CN", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Formula preguntas e hipótesis en los procesos y estructuras de ciencias de la vida a partir de observaciones/modelos.", "fields": ["G4-CN-IND1.1 (E)", "G4-CN-IND1.1 (A)", "G4-CN-IND1.1 (S)"]}, {"label": "Indicador 1.2. Analiza y aplica ideas y conceptos sobre fenómenos y propiedades en ciencias físicas mediante medición/modelos.", "fields": ["G4-CN-IND1.2 (E)", "G4-CN-IND1.2 (A)", "G4-CN-IND1.2 (S)"]}, {"label": "Indicador 1.3. Explica fenómenos de la Tierra y el universo usando observaciones/modelos.", "fields": ["G4-CN-IND1.3 (E)", "G4-CN-IND1.3 (A)", "G4-CN-IND1.3 (S)"]}, {"label": "Indicador 2.1. Reconoce y ordena pasos básicos de procedimientos científicos/tecnológicos.", "fields": ["G4-CN-IND2.1 (E)", "G4-CN-IND2.1 (A)", "G4-CN-IND2.1 (S)"]}, {"label": "Indicador 2.2. Aplica instrumentos y materiales de forma adecuada en experimentos, proyectos, exploraciones y observaciones guiadas.", "fields": ["G4-CN-IND2.2 (E)", "G4-CN-IND2.2 (A)", "G4-CN-IND2.2 (S)"]}]}, {"title": "Quinto Grado Lengua Española", "grade": 5, "type": "LE", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica información explícita e implícita en textos que lee.", "fields": ["G5-LE-IND1.1 (E)", "G5-LE-IND1.1 (A)", "G5-LE-IND1.1 (S)"]}, {"label": "Indicador 1.2. Analiza recursos lingüísticos y organizativos del texto que lee para comprender mejor su sentido.", "fields": ["G5-LE-IND1.2 (E)", "G5-LE-IND1.2 (A)", "G5-LE-IND1.2 (S)"]}, {"label": "Indicador 1.3. Valora críticamente la información y emite juicios fundamentados a partir del texto que lee.", "fields": ["G5-LE-IND1.3 (E)", "G5-LE-IND1.3 (A)", "G5-LE-IND1.3 (S)"]}, {"label": "Indicador 2.1. Organiza por escrito información e ideas de manera coherente.", "fields": ["G5-LE-IND2.1 (E)", "G5-LE-IND2.1 (A)", "G5-LE-IND2.1 (S)"]}, {"label": "Indicador 2.2. Redacta textos relacionados con el texto que lee.", "fields": ["G5-LE-IND2.2 (E)", "G5-LE-IND2.2 (A)", "G5-LE-IND2.2 (S)"]}, {"label": "Indicador 2.3. Presenta conclusiones y propuestas con base en información analizada relacionada con el texto que lee.", "fields": ["G5-LE-IND2.3 (E)", "G5-LE-IND2.3 (A)", "G5-LE-IND2.3 (S)"]}]}, {"title": "Quinto Grado Matemática", "grade": 5, "type": "MA", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Comprende y usa el sistema de numeración decimal.", "fields": ["G5-MA-IND1.1 (E)", "G5-MA-IND1.1 (A)", "G5-MA-IND1.1 (S)"]}, {"label": "Indicador 1.2. Resuelve operaciones con números naturales, fracciones y decimales en contextos cotidianos.", "fields": ["G5-MA-IND1.2 (E)", "G5-MA-IND1.2 (A)", "G5-MA-IND1.2 (S)"]}, {"label": "Indicador 1.3. Interpreta y organiza información numérica y de medidas mediante tablas y gráficos.", "fields": ["G5-MA-IND1.3 (E)", "G5-MA-IND1.3 (A)", "G5-MA-IND1.3 (S)"]}, {"label": "Indicador 2.1. Resuelve problemas de proporcionalidad y razones.", "fields": ["G5-MA-IND2.1 (E)", "G5-MA-IND2.1 (A)", "G5-MA-IND2.1 (S)"]}, {"label": "Indicador 2.2. Analiza e interpreta representaciones (tablas, gráficos, patrones) para modelar relaciones.", "fields": ["G5-MA-IND2.2 (E)", "G5-MA-IND2.2 (A)", "G5-MA-IND2.2 (S)"]}, {"label": "Indicador 2.3. Utiliza nociones geométricas y de medición para resolver problemas espaciales.", "fields": ["G5-MA-IND2.3 (E)", "G5-MA-IND2.3 (A)", "G5-MA-IND2.3 (S)"]}]}, {"title": "Quinto Grado Ciencias Sociales", "grade": 5, "type": "CS", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica tipos de fuentes, autor y fecha de autoría sobre geografía e historia del Caribe y las Antillas.", "fields": ["G5-CS-IND1.1 (E)", "G5-CS-IND1.1 (A)", "G5-CS-IND1.1 (S)"]}, {"label": "Indicador 1.2. Aplica criterios de confiabilidad e interpreta fuentes de información en Geografía e identifica el globo terráqueo identificando el Meridiano de Greenwich y el Paralelo del Ecuador.", "fields": ["G5-CS-IND1.2 (E)", "G5-CS-IND1.2 (A)", "G5-CS-IND1.2 (S)"]}, {"label": "Indicador 1.3. Ubica en una fuente de información confiable (mapas, tablas, cronologías) una masa continental y un país.", "fields": ["G5-CS-IND1.3 (E)", "G5-CS-IND1.3 (A)", "G5-CS-IND1.3 (S)"]}, {"label": "Indicador 2.1. Analiza situaciones y fenómenos de la geografía y la historia del Continente Americano.", "fields": ["G5-CS-IND2.1 (E)", "G5-CS-IND2.1 (A)", "G5-CS-IND2.1 (S)"]}, {"label": "Indicador 2.2. Identifica fenómenos de la Geografía y acontecimientos históricos del Caribe.", "fields": ["G5-CS-IND2.2 (E)", "G5-CS-IND2.2 (A)", "G5-CS-IND2.2 (S)"]}, {"label": "Indicador 2.3. Analiza de manera crítica y lógica acontecimientos históricos y fenómenos geográficos de la República Dominicana.", "fields": ["G5-CS-IND2.3 (E)", "G5-CS-IND2.3 (A)", "G5-CS-IND2.3 (S)"]}]}, {"title": "Quinto Grado Ciencias de la Naturaleza", "grade": 5, "type": "CN", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Analiza y describe procesos y estructuras de los seres vivos a partir de observaciones o modelos, estableciendo relaciones entre sus funciones y el entorno en Ciencias de la Vida.", "fields": ["G5-CN-IND1.1 (E)", "G5-CN-IND1.1 (A)", "G5-CN-IND1.1 (S)"]}, {"label": "Indicador 1.2. Interpreta y compara procesos y estructuras de la materia y la energía a partir de observaciones, experimentos o modelos, identificando causas y efectos en los fenómenos en Ciencias Físicas.", "fields": ["G5-CN-IND1.2 (E)", "G5-CN-IND1.2 (A)", "G5-CN-IND1.2 (S)"]}, {"label": "Indicador 1.3. Relaciona y argumenta fenómenos de la Tierra y del universo a partir de observaciones, modelos o representaciones, formulando ideas sobre sus causas y transformaciones.", "fields": ["G5-CN-IND1.3 (E)", "G5-CN-IND1.3 (A)", "G5-CN-IND1.3 (S)"]}, {"label": "Indicador 2.1. Analiza y describe procesos y estructuras de los seres vivos a partir de observaciones o modelos, valorando su relación con las funciones vitales y el ambiente en Ciencias de la Vida.", "fields": ["G5-CN-IND2.1 (E)", "G5-CN-IND2.1 (A)", "G5-CN-IND2.1 (S)"]}, {"label": "Indicador 2.2. Interpreta y compara procesos y estructuras vinculados con la materia, la energía y sus transformaciones a partir de observaciones, mediciones o modelos experimentales en Ciencias Físicas.", "fields": ["G5-CN-IND2.2 (E)", "G5-CN-IND2.2 (A)", "G5-CN-IND2.2 (S)"]}, {"label": "Indicador 2.3. Relaciona y argumenta fenómenos de la Tierra y del universo a partir de observaciones, modelos o simulaciones, formulando inferencias sobre sus causas y efectos.", "fields": ["G5-CN-IND2.3 (E)", "G5-CN-IND2.3 (A)", "G5-CN-IND2.3 (S)"]}]}, {"title": "Sexto Grado Lengua Española", "grade": 6, "type": "LE", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Identifica información explícita e implícita en textos diversos.", "fields": ["G6-LE-IND1.1 (E)", "G6-LE-IND1.1 (A)", "G6-LE-IND1.1 (S)"]}, {"label": "Indicador 1.2. Analiza recursos lingüísticos y organizativos del texto que lee para comprender mejor su sentido.", "fields": ["G6-LE-IND1.2 (E)", "G6-LE-IND1.2 (A)", "G6-LE-IND1.2 (S)"]}, {"label": "Indicador 1.3. Valora críticamente la información y emite juicios fundamentados.", "fields": ["G6-LE-IND1.3 (E)", "G6-LE-IND1.3 (A)", "G6-LE-IND1.3 (S)"]}, {"label": "Indicador 2.1. Expresa por escrito ideas y resultados de manera lógica, crítica con claridad y coherencia, a través de diversos textos.", "fields": ["G6-LE-IND2.1 (E)", "G6-LE-IND2.1 (A)", "G6-LE-IND2.1 (S)"]}, {"label": "Indicador 2.2. Emplea normas gramaticales y ortográficas al escribir diversos textos.", "fields": ["G6-LE-IND2.2 (E)", "G6-LE-IND2.2 (A)", "G6-LE-IND2.2 (S)"]}, {"label": "Indicador 2.3. Integra recursos lingüísticos y discursivos al escribir diversos textos.", "fields": ["G6-LE-IND2.3 (E)", "G6-LE-IND2.3 (A)", "G6-LE-IND2.3 (S)"]}]}, {"title": "Sexto Grado Matemática", "grade": 6, "type": "MA", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Comunica ideas matemáticas de manera clara.", "fields": ["G6-MA-IND1.1 (E)", "G6-MA-IND1.1 (A)", "G6-MA-IND1.1 (S)"]}, {"label": "Indicador 1.2. Argumenta procedimientos y resultados.", "fields": ["G6-MA-IND1.2 (E)", "G6-MA-IND1.2 (A)", "G6-MA-IND1.2 (S)"]}, {"label": "Indicador 1.3. Utiliza representaciones matemáticas adecuadas.", "fields": ["G6-MA-IND1.3 (E)", "G6-MA-IND1.3 (A)", "G6-MA-IND1.3 (S)"]}, {"label": "Indicador 2.1. Emplea procedimientos adecuados para resolver problemas.", "fields": ["G6-MA-IND2.1 (E)", "G6-MA-IND2.1 (A)", "G6-MA-IND2.1 (S)"]}, {"label": "Indicador 2.2. Valora la utilidad de la matemática en situaciones reales.", "fields": ["G6-MA-IND2.2 (E)", "G6-MA-IND2.2 (A)", "G6-MA-IND2.2 (S)"]}, {"label": "Indicador 3.1. Representa situaciones de su entorno mediante modelos matemáticos.", "fields": ["G6-MA-IND3.1 (E)", "G6-MA-IND3.1 (A)", "G6-MA-IND3.1 (S)"]}, {"label": "Indicador 3.2. Valida el modelo propuesto con los datos.", "fields": ["G6-MA-IND3.2 (E)", "G6-MA-IND3.2 (A)", "G6-MA-IND3.2 (S)"]}]}, {"title": "Sexto Grado Ciencias Sociales", "grade": 6, "type": "CS", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Reconoce fuentes confiables y la autoría en informaciones geográficas e históricas.", "fields": ["G6-CS-IND1.1 (E)", "G6-CS-IND1.1 (A)", "G6-CS-IND1.1 (S)"]}, {"label": "Indicador 1.2. Distingue la clasificación e importancia de la geografía (física, humana, económica).", "fields": ["G6-CS-IND1.2 (E)", "G6-CS-IND1.2 (A)", "G6-CS-IND1.2 (S)"]}, {"label": "Indicador 1.3. Analiza informaciones sobre civilizaciones antiguas y modernas y sus aportes.", "fields": ["G6-CS-IND1.3 (E)", "G6-CS-IND1.3 (A)", "G6-CS-IND1.3 (S)"]}, {"label": "Indicador 2.1. Identifica acontecimientos históricos relacionados con las civilizaciones antiguas y modernas, historia de América, y causas y consecuencias de procesos históricos relevantes.", "fields": ["G6-CS-IND2.1 (E)", "G6-CS-IND2.1 (A)", "G6-CS-IND2.1 (S)"]}, {"label": "Indicador 2.2. Analiza hechos históricos del periodo estudiado vinculados a situaciones sociales, económicas y culturales del mundo y de la República Dominicana.", "fields": ["G6-CS-IND2.2 (E)", "G6-CS-IND2.2 (A)", "G6-CS-IND2.2 (S)"]}, {"label": "Indicador 2.3. Evalúa valoraciones críticas fundamentadas en información histórica confiable.", "fields": ["G6-CS-IND2.3 (E)", "G6-CS-IND2.3 (A)", "G6-CS-IND2.3 (S)"]}]}, {"title": "Sexto Grado Ciencias de la Naturaleza", "grade": 6, "type": "CN", "description": "Escriba la cantidad de estudiantes del centro educativo según el nivel alcanzado en cada indicador evaluado.", "groups": [{"label": "Indicador 1.1. Formula preguntas e hipótesis a partir de observaciones en el entorno y experimentos realizados en Ciencias de la Vida.", "fields": ["G6-CN-IND1.1 (E)", "G6-CN-IND1.1 (A)", "G6-CN-IND1.1 (S)"]}, {"label": "Indicador 1.2. Aplica ideas y conceptos en Ciencias Física a partir de experimentos y diseño de proyectos.", "fields": ["G6-CN-IND1.2 (E)", "G6-CN-IND1.2 (A)", "G6-CN-IND1.2 (S)"]}, {"label": "Indicador 1.3. Explica fenómenos mediante modelos y representaciones en Ciencias de la Tierra y el Universo.", "fields": ["G6-CN-IND1.3 (E)", "G6-CN-IND1.3 (A)", "G6-CN-IND1.3 (S)"]}, {"label": "Indicador 2.1. Organiza y ejecuta procedimientos científicos experimentales.", "fields": ["G6-CN-IND2.1 (E)", "G6-CN-IND2.1 (A)", "G6-CN-IND2.1 (S)"]}, {"label": "Indicador 2.2. Analiza e interpreta datos de exploraciones o experimentos, teorías y principios científicos para interpretar fenómenos.", "fields": ["G6-CN-IND2.2 (E)", "G6-CN-IND2.2 (A)", "G6-CN-IND2.2 (S)"]}]}];
 
@@ -613,6 +685,14 @@ select.locked-field {
       document.getElementById("responsable_cedula").value = cedula;
       document.getElementById("responsable_telefono").value = telefono;
 
+      if (formularioEstaCerrado()) {
+        document.getElementById("modalResponsable").style.display = "none";
+        formularioPendiente = null;
+        aplicarEstadoCierreFormulario();
+        alert("El registro de resultados cerró el 12 de junio de 2026 a las 2:00 p. m.");
+        return;
+      }
+
       document.getElementById("modalResponsable").style.display = "none";
 
       if (formularioPendiente) {
@@ -665,6 +745,12 @@ select.locked-field {
     document.getElementById("formularioEvaluacion").addEventListener("submit", event => {
       event.preventDefault();
 
+      if (formularioEstaCerrado()) {
+        aplicarEstadoCierreFormulario();
+        alert("El registro de resultados cerró el 12 de junio de 2026 a las 2:00 p. m.");
+        return;
+      }
+
       const form = event.currentTarget;
       const validSums = validateAllGroups();
 
@@ -695,6 +781,8 @@ select.locked-field {
       setTimeout(validateAllGroups, 0);
     });
 
+    aplicarEstadoCierreFormulario();
+    setInterval(aplicarEstadoCierreFormulario, 1000);
     validateAllGroups();
   </script>
 </body>
