@@ -398,8 +398,9 @@ select.locked-field {
 
     // Fecha de cierre del formulario: 17 de septiembre de 2026, 4:00 p. m.
     // Se usa la zona horaria de República Dominicana (-04:00).
-    const FECHA_CIERRE_FORMULARIO = new Date("2026-09-17T16:00:00-04:00");
-
+    // Disponible durante todo el 23 de septiembre de 2026.
+// Cierra al comenzar el 24, en horario de República Dominicana.
+const FECHA_CIERRE_FORMULARIO = new Date("2026-09-24T00:00:00-04:00");
     function formularioEstaCerrado() {
       return new Date() >= FECHA_CIERRE_FORMULARIO;
     }
